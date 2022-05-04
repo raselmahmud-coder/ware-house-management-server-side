@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require("express")
 const cors = require("cors")
 const port = process.env.PORT || 4000
@@ -26,13 +26,21 @@ async function run() {
 
     const inventoryCollection = client.db("InventoryKing").collection("inventories")
       app.get('/inventories', async (req, res) => {
-    
           const query = {};
           const cursor =  inventoryCollection.find(query);
           const result = await cursor.toArray();
 
           res.send(result)
-})
+      })
+      
+      app.get("/inventory/:id", async (req, res) => {
+          const {id} = req.params;
+          console.log(id);
+          const query = {_id: ObjectId(id)};
+          const cursor = await inventoryCollection.findOne(query);
+        //   const result = await cursor.toArray();
+          res.send(cursor);
+      })
   } finally {
     // await client.close();
   }
