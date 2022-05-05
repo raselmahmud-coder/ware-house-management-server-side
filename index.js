@@ -67,6 +67,18 @@ async function run() {
       .db("InventoryKing")
       .collection("inventories");
     
+    
+    // get a specific user info query by email
+    app.get("/order", async (req, res) => {
+      const { email } = req.query
+      const query = { email: email }
+      const cursor = inventoryCollection.find(query)
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+    
+    
+    // insert an item api
     app.post("/add-item", async (req, res) => {
       const {addItem} = req.body;
       console.log(addItem);
