@@ -1,10 +1,44 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const multer = require("multer");
 const express = require("express");
 const cors = require("cors");
 const port = process.env.PORT || 4000;
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const ImageModel = require("./image.modal");
+// storage
+const Storage = multer.diskStorage({
+  destination: "uploads",
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+const upload = multer({
+  storage: Storage,
+}).single("testImage");
+
+app.post("/upload", (req, res) => {
+  upload(req, res, (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      const newImage = new ImageModel({
+        name: req.body.name,
+        image: {
+          data: req.file.filename,
+          contentType: "image/png",
+        },
+      });
+
+      newImage
+        .save()
+        .then(() => res.send("successfully loaded"))
+        .catch((err) => console.log(err));
+    }
+  });
+});
 
 // root port create
 app.get("/", (req, res) => {
@@ -32,6 +66,14 @@ async function run() {
     const inventoryCollection = client
       .db("InventoryKing")
       .collection("inventories");
+    
+    app.post("/add-item", async (req, res) => {
+      const {addItem} = req.body;
+      console.log(addItem);
+      const result = await inventoryCollection.insertOne(addItem);
+      res.send(result);
+    });
+
     app.get("/inventories", async (req, res) => {
       const query = {};
       const cursor = inventoryCollection.find(query);
