@@ -1,6 +1,7 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const multer = require("multer");
-require('dotenv').config();
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
 const express = require("express");
 const cors = require("cors");
 const port = process.env.PORT || 4000;
@@ -40,7 +41,27 @@ app.post("/upload", (req, res) => {
     }
   });
 });
-
+/*image uploading and storage to db*/
+//  auth verify function using Json web token
+function verifyJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+  console.log(req?.headers);
+  if (!authHeader) {
+    return res.status(401).send({ message: "Unauthorized access request" });
+  }
+  const token = authHeader.split(" ")[1];
+  // console.log("token",token);
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    console.log("error", err);
+    if (err) {
+      return res.status(403).send({ message: "Forbidden access" });
+    } else {
+      console.log("deCoded", decoded);
+      req.decoded = decoded;
+      next();
+    }
+  });
+}
 // root port create
 app.get("/", (req, res) => {
   res.send("this is King furniture server");
@@ -48,10 +69,8 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`king furniture listing ${port}`);
 });
-// yAuJS4zT5F1OyMtP
-// king_furniture
-// Mongo db connection
 
+// Mongo db connection
 const uri = `${process.env.API_HOST}`;
 
 const client = new MongoClient(uri, {
@@ -63,25 +82,38 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
-console.log("connected db");
+    console.log("connected db");
     const inventoryCollection = client
       .db("InventoryKing")
       .collection("inventories");
-    
-    
+    /* Authorization using Json Web Token */
+    app.post("/login", async (req, res) => {
+      const user = req.body;
+      console.log(user);
+      const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1d",
+      });
+      res.send(accessToken);
+    });
     // get a specific user info query by email
-    app.get("/order", async (req, res) => {
-      const { email } = req.query
-      const query = { email: email }
-      const cursor = inventoryCollection.find(query)
-      const result = await cursor.toArray()
-      res.send(result)
-    })
-    
-    
+    app.get("/order", verifyJWT, async (req, res) => {
+      const decodedEmail = req?.decoded?.email;
+
+      const { email } = req.query;
+      if (email === decodedEmail) {
+        const query = { email: email };
+        const cursor = inventoryCollection.find(query);
+        const result = await cursor.toArray();
+        res.send(result);
+        console.log("email is valid");
+      } else {
+        return res.status(403).send({ message: "Forbidden access" });
+      }
+    });
+
     // insert an item api
     app.post("/add-item", async (req, res) => {
-      const {addItem} = req.body;
+      const { addItem } = req.body;
       console.log(addItem);
       const result = await inventoryCollection.insertOne(addItem);
       res.send(result);
