@@ -1,5 +1,6 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const multer = require("multer");
+require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const port = process.env.PORT || 4000;
@@ -51,8 +52,8 @@ app.listen(port, () => {
 // king_furniture
 // Mongo db connection
 
-const uri =
-  "mongodb+srv://king_furniture:yAuJS4zT5F1OyMtP@cluster0.w1eom.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const uri = `${process.env.API_HOST}`;
+
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -62,7 +63,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
-
+console.log("connected db");
     const inventoryCollection = client
       .db("InventoryKing")
       .collection("inventories");
