@@ -4,9 +4,8 @@ This website live link is [Here](https://assignment-11-b89a5.web.app/).
 
 This is Stack OverFlow link [Click Here](https://stackoverflow.com/questions/72152593/how-to-pass-onclick-function-in-sibling-components-using-functional-components/72152679#72152679)
 
-This is client side code link [Click Here](https://github.com/ProgrammingHeroWC4/warehouse-management-client-side-raselmahmud22)
+This is client side code link [Click Here](https://github.com/raselmahmud22/ware-house-management-client-side)
 
-This is server side code link [Click Here](https://github.com/ProgrammingHeroWC4/warehouse-management-server-side-raselmahmud22)
 
 
 Short Description:
