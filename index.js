@@ -148,7 +148,7 @@ async function run() {
       const result = await inventoryCollection.updateOne(
         filter,
         updatedDoc,
-        options
+        options,
       );
       res.send(result);
     });
@@ -161,7 +161,7 @@ async function run() {
       res.send(result);
     });
   } finally {
-    // await client.close();
+    console.log("finally section");
   }
 }
 run().catch(console.dir);
